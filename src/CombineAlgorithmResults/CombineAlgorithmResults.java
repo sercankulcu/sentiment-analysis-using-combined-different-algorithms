@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import weka.classifiers.bayes.ComplementNaiveBayes;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.bayes.NaiveBayesMultinomial;
-import weka.classifiers.functions.LibSVM;
+//import weka.classifiers.functions.LibSVM;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
@@ -144,35 +144,36 @@ public double calculateAccuracyCombine(FilteredClassifier[] classifier) throws E
 
 		
 		String str;
-		BufferedReader in = new BufferedReader(new FileReader("negative.txt"));
+		BufferedReader in = new BufferedReader(new FileReader("training/negative.txt"));
 		while ((str = in.readLine()) != null) {
 			negativeTweets.add(str);
 		}
 
-		in = new BufferedReader(new FileReader("positive.txt"));
+		in = new BufferedReader(new FileReader("training/positive.txt"));
 		while ((str = in.readLine()) != null) {
 			positiveTweets.add(str);
 		}
 		
 		FilteredClassifier[] classifier = new FilteredClassifier[5]; 
 				
-		classifier[0] = car.loadModel("filterednaivebayes.model");
+		classifier[0] = car.loadModel("models/filterednaivebayes.model");
 		System.out.println("Naive bayes");
 		System.out.println("Accuracy (Real Test Data) is " + car.calculateAccuracy(classifier[0]) + "\n");
 
-		classifier[1] = car.loadModel("filteredcomplement.model");
+		classifier[1] = car.loadModel("models/filteredcomplement.model");
 		System.out.println("Complement");
 		System.out.println("Accuracy (Real Test Data) is " + car.calculateAccuracy(classifier[1]) + "\n");
 		
-		classifier[2] = car.loadModel("filteredmultinomial.model");
+		classifier[2] = car.loadModel("models/filteredmultinomial.model");
 		System.out.println("Multinomial");
 		System.out.println("Accuracy (Real Test Data) is " + car.calculateAccuracy(classifier[2]) + "\n");
 		
-		classifier[3] = car.loadModel("filteredlibsvm.model");
+		//classifier[3] = car.loadModel("filteredlibsvm.model");
+		classifier[3] = car.loadModel("models/filteredj48.model");
 		System.out.println("SVM");
 		System.out.println("Accuracy (Real Test Data) is " + car.calculateAccuracy(classifier[3]) + "\n");
 		
-		classifier[4] = car.loadModel("filteredj48.model");
+		classifier[4] = car.loadModel("models/filteredj48.model");
 		System.out.println("J48");
 		System.out.println("Accuracy (Real Test Data) is " + car.calculateAccuracy(classifier[4]) + "\n");
 
@@ -180,7 +181,7 @@ public double calculateAccuracyCombine(FilteredClassifier[] classifier) throws E
 		System.out.println("Accuracy is " + car.calculateAccuracyCombine(classifier));
 
 		// load dataset
-		DataSource source = new DataSource("data.arff");
+		DataSource source = new DataSource("training/data.arff");
 		Instances data = source.getDataSet();
 
 		if (data.classIndex() == -1)
@@ -188,19 +189,19 @@ public double calculateAccuracyCombine(FilteredClassifier[] classifier) throws E
 
 		// create algoritms instances and load their models
 		NaiveBayes nb = new NaiveBayes();
-		nb = (NaiveBayes) weka.core.SerializationHelper.read("naivebayes.model");
+		nb = (NaiveBayes) weka.core.SerializationHelper.read("models/naivebayes.model");
 
 		NaiveBayesMultinomial nbm = new NaiveBayesMultinomial();
-		nbm = (NaiveBayesMultinomial) weka.core.SerializationHelper.read("naivebayesmultinomial.model");
+		nbm = (NaiveBayesMultinomial) weka.core.SerializationHelper.read("models/naivebayesmultinomial.model");
 
 		ComplementNaiveBayes cnb = new ComplementNaiveBayes();
-		cnb = (ComplementNaiveBayes) weka.core.SerializationHelper.read("complementnaivebayes.model");
+		cnb = (ComplementNaiveBayes) weka.core.SerializationHelper.read("models/complementnaivebayes.model");
 
-		LibSVM svm = new LibSVM();
-		svm = (LibSVM) weka.core.SerializationHelper.read("libsvm.model");
+		//LibSVM svm = new LibSVM();
+		//svm = (LibSVM) weka.core.SerializationHelper.read("libsvm.model");
 
 		J48 j48 = new J48();
-		j48 = (J48) weka.core.SerializationHelper.read("j48.model");
+		j48 = (J48) weka.core.SerializationHelper.read("models/j48.model");
 
 		int truePositiveCount = 0;
 		int falsePositiveCount = 0;
@@ -212,7 +213,8 @@ public double calculateAccuracyCombine(FilteredClassifier[] classifier) throws E
 			double d = nb.classifyInstance(data.instance(i));
 			d += nbm.classifyInstance(data.instance(i));
 			d += cnb.classifyInstance(data.instance(i));
-			d += svm.classifyInstance(data.instance(i));
+			//d += svm.classifyInstance(data.instance(i));
+			d += j48.classifyInstance(data.instance(i));
 			d += j48.classifyInstance(data.instance(i));
 
 			if(d > 2.5) { // more than 3 algorithms predicts positive
